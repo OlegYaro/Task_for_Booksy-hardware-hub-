@@ -1,7 +1,11 @@
+import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.database import Base, engine
 
@@ -42,3 +46,40 @@ def register_routers():
 
 
 register_routers()
+
+
+def _mount_frontend():
+    """Serve the built Vue SPA from the backend when a build is present.
+
+    In production we ship one service: FastAPI answers `/api/*` and serves the
+    Vite build for everything else, so there's a single origin and no CORS. In
+    local dev the build usually isn't there, so this is a no-op and the Vite dev
+    server proxies `/api` instead. STATIC_DIR lets the container point at the
+    copied build; otherwise we look for frontend/dist next to the repo.
+    """
+    env_dir = os.environ.get("STATIC_DIR")
+    static_dir = (
+        Path(env_dir)
+        if env_dir
+        else Path(__file__).resolve().parents[2] / "frontend" / "dist"
+    )
+    index = static_dir / "index.html"
+    if not index.is_file():
+        return
+
+    assets = static_dir / "assets"
+    if assets.is_dir():
+        app.mount("/assets", StaticFiles(directory=assets), name="assets")
+
+    # Catch-all: real files (favicon, etc.) are served as-is; every other path
+    # falls back to index.html so client-side routes survive a hard refresh.
+    # Registered last, so it never shadows /api/* or the docs.
+    @app.get("/{full_path:path}")
+    def spa(full_path: str):
+        candidate = static_dir / full_path
+        if full_path and candidate.is_file():
+            return FileResponse(candidate)
+        return FileResponse(index)
+
+
+_mount_frontend()
