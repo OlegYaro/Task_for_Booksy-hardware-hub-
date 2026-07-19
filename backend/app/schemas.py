@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 # ---- Auth ----
@@ -16,12 +16,11 @@ class UserCreate(BaseModel):
 
 
 class UserOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     email: str
     is_admin: bool
-
-    class Config:
-        from_attributes = True
 
 
 # ---- Hardware ----
@@ -42,6 +41,8 @@ class HardwareUpdate(BaseModel):
 
 
 class HardwareOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     original_seed_id: Optional[int] = None
     name: str
@@ -51,9 +52,6 @@ class HardwareOut(BaseModel):
     notes: Optional[str]
     assigned_to: Optional[str]
     data_flag: Optional[str]
-
-    class Config:
-        from_attributes = True
 
 
 # ---- AI ----
