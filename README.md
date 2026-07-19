@@ -9,6 +9,23 @@ Built with **FastAPI + SQLite** on the backend and **Vue 3 (Vite)** on the front
 
 ---
 
+## Live demo
+
+Deployed on Fly.io as a single service (FastAPI serves the built Vue SPA):
+
+> **https://hardware-hub-booksy-demo.fly.dev**
+>
+> Admin login: **admin@booksy.com** — the password is in my submission email
+> (I keep live credentials out of the public repo on purpose).
+
+Running in `ENVIRONMENT=production`, so the fail-closed guard (see
+[Security](#security)) is active — the app would refuse to boot on the default
+signing key or admin password, so both are set to real secrets on the host. The
+machine sleeps when idle, so the first request after a while has a short cold
+start. The demo runs on SQLite with a fresh seed, so data resets on redeploy.
+
+---
+
 ## Running it locally
 
 You need Python 3.11+ and Node 18+.
