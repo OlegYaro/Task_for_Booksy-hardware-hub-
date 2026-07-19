@@ -6,7 +6,7 @@ import { store } from '../store.js'
 
 const router = useRouter()
 const email = ref('admin@booksy.com')
-const password = ref('admin123')
+const password = ref('')
 const error = ref('')
 const loading = ref(false)
 
@@ -44,7 +44,8 @@ async function submit() {
 
       <p v-if="error" class="err">{{ error }}</p>
       <p class="muted hint">
-        Accounts are created by an admin. Seeded admin: admin@booksy.com / admin123
+        Accounts are created by an admin — there's no public sign-up. Demo
+        credentials are provided separately (see the README / submission).
       </p>
     </div>
   </div>
