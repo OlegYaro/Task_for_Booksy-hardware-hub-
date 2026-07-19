@@ -44,8 +44,10 @@ async function submit() {
 
       <p v-if="error" class="err">{{ error }}</p>
       <p class="muted hint">
-        Accounts are created by an admin — there's no public sign-up. Demo
-        credentials are provided separately (see the README / submission).
+        Accounts are created by an admin — there's no public sign-up.
+        <br />
+        Demo admin: <strong>admin@booksy.com</strong> /
+        <strong>HwHub-Admin-daff4046</strong>
       </p>
     </div>
   </div>
