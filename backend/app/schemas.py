@@ -43,6 +43,7 @@ class HardwareUpdate(BaseModel):
 
 class HardwareOut(BaseModel):
     id: int
+    original_seed_id: Optional[int] = None
     name: str
     brand: str
     purchase_date: Optional[str]

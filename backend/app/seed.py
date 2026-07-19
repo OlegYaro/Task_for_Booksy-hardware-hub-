@@ -73,9 +73,9 @@ def _normalize_status(raw: str, name: str):
     return status, None
 
 
-def _clean_record(rec: dict):
+def _clean_record(rec: dict, extra_flags: list[str] | None = None):
     name = rec.get("name") or "Unnamed device"
-    flags: list[str] = []
+    flags: list[str] = list(extra_flags or [])
 
     brand = _normalize_brand(rec.get("brand", ""))
     if not brand:
@@ -93,6 +93,7 @@ def _clean_record(rec: dict):
     notes = rec.get("notes") or rec.get("history")
 
     return Hardware(
+        original_seed_id=rec.get("id"),
         name=name,
         brand=brand,
         purchase_date=purchase_date,
@@ -111,13 +112,22 @@ def seed_database() -> None:
 
         audit_log.clear()
 
-        # Deduplicate the raw records by their id before inserting.
-        by_id: dict[int, dict] = {}
+        # Do NOT deduplicate by the seed's id: two records share id=4, and
+        # trusting that id as a key would silently drop a real device. Instead
+        # we insert every record with a fresh auto-increment primary key, keep
+        # the original id for provenance, and log the collision for review.
+        seen_ids: set[int] = set()
         for rec in RAW_SEED:
-            by_id[rec["id"]] = rec
-
-        for rec in by_id.values():
-            db.add(_clean_record(rec))
+            extra_flags: list[str] = []
+            seed_id = rec.get("id")
+            if seed_id in seen_ids:
+                _log(
+                    f"Duplicate seed id {seed_id} on '{rec.get('name')}': "
+                    "kept as a separate record with a new primary key"
+                )
+                extra_flags.append(f"duplicate seed id {seed_id}")
+            seen_ids.add(seed_id)
+            db.add(_clean_record(rec, extra_flags))
 
         # Ensure there is always a way into the system.
         if not db.query(User).filter(User.email == settings.default_admin_email).first():

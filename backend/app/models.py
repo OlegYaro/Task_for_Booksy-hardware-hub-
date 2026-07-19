@@ -26,6 +26,12 @@ class Hardware(Base):
     __tablename__ = "hardware"
 
     id = Column(Integer, primary_key=True, index=True)
+
+    # The id that came from the seed file. NOT used as the primary key: the
+    # seed contains a duplicate id, so trusting it would drop a real record.
+    # Kept only for provenance/traceability back to the source data.
+    original_seed_id = Column(Integer, nullable=True)
+
     name = Column(String, nullable=False)
     brand = Column(String, nullable=False, default="")
     purchase_date = Column(String, nullable=True)  # ISO string, nullable for unknown
