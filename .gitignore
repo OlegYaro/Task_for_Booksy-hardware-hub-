@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# Database
+*.db
+*.sqlite3
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Node / Vue
+node_modules/
+frontend/dist/
+.vite/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# The original assessment PDF (not part of the codebase)
+Final_Assessment_-_TECH.pdf
