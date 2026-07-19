@@ -1,0 +1,28 @@
+# Fly.io config for the single-service deploy (FastAPI serves the built SPA).
+# Secrets (SECRET_KEY, DEFAULT_ADMIN_PASSWORD, optional ANTHROPIC_API_KEY) are
+# set with `fly secrets set`, never committed here.
+app = "hardware-hub-booksy-demo"
+primary_region = "waw"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  ENVIRONMENT = "production"
+  PORT = "8000"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  # Scale to zero when idle to stay inside the free allowance; first request
+  # after a nap has a short cold start.
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[http_service.checks]]
+  interval = "15s"
+  timeout = "2s"
+  grace_period = "10s"
+  method = "GET"
+  path = "/api/health"
