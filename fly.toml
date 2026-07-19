@@ -2,7 +2,7 @@
 # Secrets (SECRET_KEY, DEFAULT_ADMIN_PASSWORD, optional ANTHROPIC_API_KEY) are
 # set with `fly secrets set`, never committed here.
 app = "hardware-hub-booksy-demo"
-primary_region = "waw"
+primary_region = "fra"
 
 [build]
   dockerfile = "Dockerfile"
