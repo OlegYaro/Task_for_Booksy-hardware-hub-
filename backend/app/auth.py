@@ -32,6 +32,21 @@ def verify_password(plain: str, hashed: str) -> bool:
     return bcrypt.checkpw(_to_bytes(plain), hashed.encode("utf-8"))
 
 
+# A pre-computed hash of a value no one can log in with. When an email doesn't
+# exist we still run a real bcrypt verify against this, so login takes the same
+# time whether or not the account is real — closing the timing side-channel that
+# would otherwise let an attacker enumerate valid emails (OWASP ASVS V2.2).
+DUMMY_PASSWORD_HASH = hash_password("constant-time-placeholder-not-a-real-password")
+
+
+def verify_password_constant_time(plain: str, hashed: Optional[str]) -> bool:
+    """Verify a password, always doing the bcrypt work even for unknown users."""
+    if hashed is None:
+        bcrypt.checkpw(_to_bytes(plain), DUMMY_PASSWORD_HASH.encode("utf-8"))
+        return False
+    return verify_password(plain, hashed)
+
+
 def create_access_token(subject: str) -> str:
     expire = datetime.now(timezone.utc) + timedelta(
         minutes=settings.access_token_expire_minutes

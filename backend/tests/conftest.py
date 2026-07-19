@@ -15,6 +15,17 @@ from app.main import app
 from app.seed import seed_database
 
 
+@pytest.fixture(autouse=True)
+def _reset_login_throttle():
+    # The login rate limiter is process-global in-memory state; clear it around
+    # every test so failure counts never leak between cases.
+    from app.ratelimit import login_rate_limiter
+
+    login_rate_limiter.clear()
+    yield
+    login_rate_limiter.clear()
+
+
 @pytest.fixture
 def client():
     # Fresh, freshly-seeded database for every test.
