@@ -57,3 +57,42 @@ class LoginRateLimiter:
 
 
 login_rate_limiter = LoginRateLimiter()
+
+
+class SlidingWindowCounter:
+    """Counts every event per key in a sliding window and caps it.
+
+    Unlike the login limiter (which only counts failures), this caps *all*
+    calls — used to bound the billable AI endpoints.
+    """
+
+    def __init__(self, limit: int, window: int):
+        self.limit = limit
+        self.window = window
+        self._events: dict[str, deque[float]] = defaultdict(deque)
+
+    def _prune(self, key: str, now: float) -> None:
+        bucket = self._events[key]
+        cutoff = now - self.window
+        while bucket and bucket[0] < cutoff:
+            bucket.popleft()
+        if not bucket:
+            self._events.pop(key, None)
+
+    def allow(self, key: str) -> bool:
+        now = time.monotonic()
+        self._prune(key, now)
+        if len(self._events[key]) >= self.limit:
+            return False
+        self._events[key].append(now)
+        return True
+
+    def clear(self) -> None:
+        self._events.clear()
+
+
+# The AI endpoints call Claude and cost money per request. The demo login is
+# public, so anyone could reach them — cap usage so no one can run up the bill:
+# a per-IP burst limit and a hard global daily ceiling.
+ai_per_ip_limiter = SlidingWindowCounter(limit=15, window=10 * 60)
+ai_global_limiter = SlidingWindowCounter(limit=500, window=24 * 60 * 60)

@@ -19,11 +19,17 @@ from app.seed import seed_database
 def _reset_login_throttle():
     # The login rate limiter is process-global in-memory state; clear it around
     # every test so failure counts never leak between cases.
-    from app.ratelimit import login_rate_limiter
+    from app.ratelimit import (
+        ai_global_limiter,
+        ai_per_ip_limiter,
+        login_rate_limiter,
+    )
 
-    login_rate_limiter.clear()
+    for limiter in (login_rate_limiter, ai_per_ip_limiter, ai_global_limiter):
+        limiter.clear()
     yield
-    login_rate_limiter.clear()
+    for limiter in (login_rate_limiter, ai_per_ip_limiter, ai_global_limiter):
+        limiter.clear()
 
 
 @pytest.fixture
