@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./hardware_hub.db"
 
     anthropic_api_key: str = ""
-    anthropic_model: str = "claude-sonnet-5"
+    anthropic_model: str = "claude-haiku-4-5-20251001"
 
     # Default admin, created on first boot so there is a way into the system.
     default_admin_email: str = "admin@booksy.com"
